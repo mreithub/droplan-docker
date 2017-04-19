@@ -1,6 +1,6 @@
 #!/bin/sh
 
-set -ex
+set -e
 
 if [ -z "$DO_INTERVAL" ]; then
 	# specifies the default launch interval
