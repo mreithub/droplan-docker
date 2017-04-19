@@ -3,14 +3,24 @@
 set -ex
 
 if [ -z "$DO_INTERVAL" ]; then
-	# specifies the check interval
+	# specifies the default launch interval
 	DO_INTERVAL=300
 fi
 
+SUCCESSFUL=
 while true; do
-	# since we use 'set -e', this while loop will exit if droplan exits with a return value other than 0
-	# (which in turn tells docker to restart the container (assuming the --restart option was used)
-	# while delaying retries exponentially)
-	./droplan "$@"
+	rc=0
+	./droplan "$@" || rc="$?"
+	if [ "$rc" -ne 0 ]; then
+		# droplan failed. See if that happened before
+		if [ -z "$SUCCESSFUL" ]; then
+			echo "ERROR: droplan exited with code $rc" >&2
+			exit "$rc"
+		else
+			echo "ERROR: droplan exited with code $rc, restarting in ${DO_INTERVAL}s" >&2
+		fi
+	fi
+
+	SUCCESSFUL='yes'
 	sleep "$DO_INTERVAL"
 done
