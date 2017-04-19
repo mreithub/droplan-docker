@@ -3,6 +3,7 @@
 This is an autobuild-enabled docker image for tam7t's [droplan][droplan] utility for [DigitalOcean][digitalocean].  
 It automagically isolates your DigitalOcean droplets from other people's droplets in the same datacenter.
 
+
 Each time `droplan` runs (default interval: 5 minutes), it'll get a list of droplets in the current datacenter
 (and filters them by `$DO_TAG` if specified) and configures the firewall to prevent all incoming traffic
 from anywhere but your droplets' IPs.
@@ -67,12 +68,13 @@ iptables -A INPUT -i eth1 -j DROP
 iptables -A droplan-peers -s 10.1.2.3/32 -j ACCEPT
 ```
 
-### Troubleshooting
+### Notes
 
 - To immediately 'scan' for new droplets (i.e. avoid having to wait `DO_INTERVAL` seconds, just restart the container: `docker restart droplan`)
 - If there's an error reaching DigitalOcean's API servers, the existing `iptables` firewall rules are left unchanged.
 - This image restarts `droplan` automatically on error. If the first invocation fails however, it'll exit with the specified error code.  
   This makes sure `DO_INTERVAL` is honored even in case of errors (and somewhat protects you from misconfiguration)
+- The official [droplan docker image][droplan] will run only once if you don't specify `DO_INTERVAL` (while this image defaults to a value of 300 seconds)
 - For a simple way to reach your internal servers (the ones with `PUBLIC=true`), you could use [ondevice.io](https://ondevice.io).  
   It'll wrap your incoming `ssh` connections into an outgoing websocket connection (which isn't affected by `droplan`'s firewall rules).
  
